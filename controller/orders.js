@@ -3,6 +3,7 @@
 /* eslint-disable no-restricted-syntax */
 const {
   schemeTablaOrder, schemeTablaProduct, schemeTablaOrdersProduct,
+  schemeTablaOrderStatus,
 } = require('../models/modelScheme');
 
 module.exports = {
@@ -13,6 +14,9 @@ module.exports = {
     schemeTablaOrder.findAll({
       limit: limitAsParm,
       offset: pageAsParm * limitAsParm,
+      include: [{
+        model: schemeTablaOrderStatus,
+      }],
     })
       .then((data) => { resp.status(200).json({ orders: data }); })
       .catch((error) => { resp.status(500).json({ message: error.message }); });
@@ -21,7 +25,11 @@ module.exports = {
   getOrdersById: async (req, resp, next) => {
     const orderIdasParm = req.params.orderId;
 
-    const foundedOrder = await schemeTablaOrder.findByPk(orderIdasParm);
+    const foundedOrder = await schemeTablaOrder.findByPk(orderIdasParm, {
+      include: [{
+        model: schemeTablaOrderStatus,
+      }],
+    });
     if (foundedOrder) {
       return resp.status(200).json({ foundedOrder });
     }
@@ -73,17 +81,27 @@ module.exports = {
     });
   },
 
-  postOrders: (req, resp, next) => {
+  postOrders: async (req, resp, next) => {
     const userIdFromReq = req.body.userId;
     const clientFromReq = req.body.client;
     const statusFromReq = req.body.status;
     const listOfProducts = req.body.products;
+
+    if (statusFromReq == null || statusFromReq === '') {
+      return resp.status(400).json({ message: 'Status from request must not be empty.' });
+    }
+
+    const foundedOrderStatus = await schemeTablaOrderStatus.findByPk(statusFromReq);
+    if (!foundedOrderStatus) {
+      return resp.status(400).json({ message: 'Order status value is invalid. No order status was found.' });
+    }
 
     // para crear un orderProducts primero necesitamos una orden!! entonces la creamos
     schemeTablaOrder.create({
       userId: userIdFromReq,
       client: clientFromReq,
       status: statusFromReq,
+      orderstatusId: statusFromReq,
     }).then((createdOrder) => {
       for (const item of listOfProducts) {
         // aqui para insertar un orderProducts necesitamos una orderId, un productId y una cantidad.
