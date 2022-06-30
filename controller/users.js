@@ -2,11 +2,17 @@ const bcrypt = require('bcrypt');
 
 const {
   schemeTablaUser,
+  schemeTablaUserRoles,
 } = require('../models/modelScheme');
 
 module.exports = {
   getUsers: (req, resp, next) => {
     // findAll metodo que recorre filas y retorna los arreglos
+    schemeTablaUser.findAll({
+      include: [{
+        model: schemeTablaUserRoles,
+      }],
+    });
     schemeTablaUser.findAll()
       .then((data) => {
         const newFormat = data.map((user) => {
@@ -14,9 +20,9 @@ module.exports = {
             id: user.dataValues.id,
             email: user.dataValues.email,
             password: user.dataValues.password,
-            roles: {
-              admin: user.dataValues.roles,
-            },
+            admin: user.dataValues.roles,
+            userRol: user.dataValues.userrol,
+
           };
           return objectData;
         });
@@ -27,15 +33,18 @@ module.exports = {
   getUserId: async (req, resp) => {
     const userIdAsParm = req.params.uid;
 
-    const foundedUser = await schemeTablaUser.findByPk(userIdAsParm);
+    const foundedUser = await schemeTablaUser.findByPk(userIdAsParm, {
+      include: [{
+        model: schemeTablaUserRoles,
+      }],
+    });
     if (foundedUser) {
       return resp.status(200).json({
         id: foundedUser.id,
         email: foundedUser.email,
         password: foundedUser.password,
-        roles: {
-          admin: foundedUser.roles,
-        },
+        roles: foundedUser.roles,
+        userRol: foundedUser.dataValues.userrol,
       });
     }
     return resp.status(404).json({ error: 'User not found.' });
@@ -45,8 +54,17 @@ module.exports = {
     const emailFromReq = req.body.email;
     const passwordFromReq = req.body.password;
     const rolesFromReq = req.body.roles;
+    const userRolIdFromReq = req.body.userrolid;
     if (emailFromReq == null || passwordFromReq == null || emailFromReq === '' || passwordFromReq === '') {
       return resp.status(400).json({ message: 'Email and password must not be empty.' });
+    }
+    if (userRolIdFromReq == null || userRolIdFromReq === '') {
+      return resp.status(400).json({ message: 'User rol Id must not be empty.' });
+    }
+
+    const foundedUserRol = await schemeTablaUserRoles.findByPk(userRolIdFromReq);
+    if (!foundedUserRol) {
+      return resp.status(400).json({ message: 'User rol Id is invalid. No user rol was found.' });
     }
     // guardar password encriptado al crear y guardar un nuevo user
     const salt = await bcrypt.genSalt(10);
@@ -56,14 +74,14 @@ module.exports = {
       email: emailFromReq,
       password: encryptedPassword,
       roles: rolesFromReq,
+      userrolId: userRolIdFromReq,
     }).then((data) => {
       resp.status(200).json({
         id: data.dataValues.id,
         email: data.dataValues.email,
         password: data.dataValues.password,
-        roles: {
-          admin: data.dataValues.roles,
-        },
+        roles: data.dataValues.roles,
+        userRol: foundedUserRol.dataValues.name,
       });
     })
       .catch((error) => { resp.status(403).json({ error: error.message }); });
