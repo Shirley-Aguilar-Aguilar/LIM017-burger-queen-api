@@ -35,12 +35,6 @@ const productWithoutValues = {
   image: '',
   type: '',
 };
-const productDoesNotExist = {
-  name: 'martillo',
-  price: '80',
-  image: 'sin image',
-  type: 'ferreteria',
-};
 
 const productWithoutType = {
   name: 'hamburguesa simple',
@@ -219,11 +213,12 @@ describe('PUT/products', () => {
   it('should return 400 when typeof of price is not number', (done) => {
     request.post('/auth').send(adminUserCorrect).then((response) => {
       const token = response.body.accessToken;
-      request.put(`/products/${idProductNew}`).set('access-token', `${token}`).send(productWithPriceNotNumber).then((response) => {
-        expect(response.statusCode).toEqual(404);
-        expect(response.body.message).toBeTruthy();
-        done();
-      });
+      request.put(`/products/${idProductNew}`).set('access-token', `${token}`)
+        .send(productWithPriceNotNumber).then((response) => {
+          expect(response.statusCode).toEqual(404);
+          expect(response.body.message).toBeTruthy();
+          done();
+        });
     });
   });
   it('should return 404 when product is not exist', (done) => {
@@ -252,7 +247,7 @@ describe('PUT/products', () => {
         });
     });
   });
-  it('should return 400 when properties not found', (done) => {
+  it('should return 400 when any property to modify is indicated', (done) => {
     request.post('/auth').send(adminUserCorrect).then((response) => {
       const token = response.body.accessToken;
       request.put(`/products/${idProductNew}`).set('access-token', token)
@@ -268,7 +263,7 @@ describe('PUT/products', () => {
 });
 
 describe('DELETE/products', () => {
-  it('should edit orders by id', (done) => {
+  it('should delete orders by id', (done) => {
     request.post('/auth').send(adminUserCorrect).then((resp) => {
       const token = resp.body.accessToken;
       request.delete(`/products/${idProductNew}`)
