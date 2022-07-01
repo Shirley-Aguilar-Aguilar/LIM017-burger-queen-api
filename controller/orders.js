@@ -87,7 +87,7 @@ module.exports = {
     const statusFromReq = req.body.status;
     const listOfProducts = req.body.products;
 
-    if (statusFromReq == null || statusFromReq === '') {
+    if (statusFromReq === null || statusFromReq === '') {
       return resp.status(400).json({ message: 'Status from request must not be empty.' });
     }
 

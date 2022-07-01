@@ -13,7 +13,7 @@ const connection = postgreConnection;
 try {
   connection.authenticate();
   console.log('Connection has been established successfully.');
-  //connection.sync({ alter: true }); // sincronizacion con base de datos
+  connection.sync({ force: true }); // sincronizacion con base de datos
   // force(elimina anteriores) alter: añade cambios
 } catch (error) {
   console.error('Unable to connect to the database..Ending backend:', error);

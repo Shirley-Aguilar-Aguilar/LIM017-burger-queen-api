@@ -6,7 +6,7 @@ const {
 } = require('../models/modelScheme');
 
 module.exports = {
-  getUsers: (req, resp, next) => {
+  getUsers: (req, resp) => {
     // findAll metodo que recorre filas y retorna los arreglos
     schemeTablaUser.findAll({
       include: [{
@@ -20,8 +20,8 @@ module.exports = {
             id: user.dataValues.id,
             email: user.dataValues.email,
             password: user.dataValues.password,
-            admin: user.dataValues.roles,
-            userRol: user.dataValues.userrol,
+            admin: user.dataValues.admin,
+            userRol: user.dataValues.userrolid,
 
           };
           return objectData;
@@ -43,21 +43,32 @@ module.exports = {
         id: foundedUser.id,
         email: foundedUser.email,
         password: foundedUser.password,
-        roles: foundedUser.roles,
-        userRol: foundedUser.dataValues.userrol,
+        admin: foundedUser.admin,
+        userRol: foundedUser.dataValues.userrolid,
       });
     }
     return resp.status(404).json({ error: 'User not found.' });
   },
 
-  postUsers: async (req, resp, next) => {
+  postUsers: async (req, resp) => {
+    const nameUserFromReq = req.body.name;
     const emailFromReq = req.body.email;
     const passwordFromReq = req.body.password;
-    const rolesFromReq = req.body.roles;
-    const userRolIdFromReq = req.body.userrolid;
+    const rolesFromReq = req.body.admin;
+    const userRolIdFromReq = req.body.userRolId;
+
+    if (nameUserFromReq == null || nameUserFromReq == null || nameUserFromReq === '' || nameUserFromReq === '') {
+      return resp.status(400).json({ message: 'Name must not be empty.' });
+    }
+
     if (emailFromReq == null || passwordFromReq == null || emailFromReq === '' || passwordFromReq === '') {
       return resp.status(400).json({ message: 'Email and password must not be empty.' });
     }
+
+    if (rolesFromReq == null || rolesFromReq === '') {
+      return resp.status(400).json({ message: 'Admin must not be empty.' });
+    }
+
     if (userRolIdFromReq == null || userRolIdFromReq === '') {
       return resp.status(400).json({ message: 'User rol Id must not be empty.' });
     }
@@ -71,29 +82,31 @@ module.exports = {
     const encryptedPassword = await bcrypt.hash(passwordFromReq, salt);
 
     schemeTablaUser.create({
+      name: nameUserFromReq,
       email: emailFromReq,
       password: encryptedPassword,
-      roles: rolesFromReq,
+      admin: rolesFromReq,
       userrolId: userRolIdFromReq,
     }).then((data) => {
       resp.status(200).json({
         id: data.dataValues.id,
+        name: nameUserFromReq,
         email: data.dataValues.email,
-        password: data.dataValues.password,
-        roles: data.dataValues.roles,
+        admin: data.dataValues.admin,
         userRol: foundedUserRol.dataValues.name,
       });
     })
       .catch((error) => { resp.status(403).json({ error: error.message }); });
   },
 
-  putUsers: async (req, resp, next) => {
+  putUsers: async (req, resp) => {
     const userIdAsParm = req.params.uid; // id
     const foundedUser = await schemeTablaUser.findByPk(userIdAsParm);
     // actualizar los campos email password y roles
     const newEmail = req.body.email;
     const newPassword = req.body.password;
-    const newRoles = req.body.roles;
+    const newAdmi = req.body.admin;
+    const newRol = req.body.userRol;
     if (newEmail == null || newPassword == null || newEmail === '' || newPassword === '') {
       return resp.status(400).json({ message: 'Email and password must not be empty.' });
     }
@@ -101,16 +114,16 @@ module.exports = {
       try {
         foundedUser.email = newEmail;
         foundedUser.password = newPassword;
-        foundedUser.roles = newRoles;
+        foundedUser.admin = newAdmi;
+        foundedUser.userRol = newRol;
 
         await foundedUser.save();
         return resp.status(200).json({
           id: foundedUser.dataValues.id,
           email: newEmail,
           password: newPassword,
-          roles: {
-            admin: newRoles,
-          },
+          admin: newAdmi,
+          userRolesId: newRol,
         });
       } catch (error) {
         return resp.status(500).json({ error: error.message });
@@ -119,7 +132,7 @@ module.exports = {
       return resp.status(404).json({ error: 'User not found.' });
     }
   },
-  deleteUsers: async (req, resp, next) => {
+  deleteUsers: async (req, resp) => {
     const userIdAsParm = req.params.uid;
     const foundedUser = await schemeTablaUser.findByPk(userIdAsParm);
     if (foundedUser) {

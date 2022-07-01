@@ -27,14 +27,20 @@ module.exports = {
         // datos para token
         const payload = {
           email: emailFromReq,
-          roles: foundedUser.roles,
+          admin: foundedUser.admin,
         };
         // jwv recibe la data a guardar, palabras clave y el tiempo de duración.
         const token = jwt.sign(payload, config.secret, {
           expiresIn: config.access_token_life_in_seconds,
         });
 
-        return resp.status(200).json({ accessToken: token });
+        return resp.status(200).json({
+          accessToken: token,
+          name: foundedUser.name,
+          email: foundedUser.email,
+          admin: foundedUser.admin,
+          userRol: foundedUser.userRol,
+        });
       }
       return resp.status(404).json({ message: 'Credentials are invalid.' });
     }

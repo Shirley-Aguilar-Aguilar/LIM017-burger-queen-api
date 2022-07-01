@@ -57,7 +57,7 @@ module.exports.isAdmin = (req) => {
       // console.log('token SI valido!!!!! decoded ', decoded);
       // console.log('token SI valido!!!!! decoded email ', decoded.email);
 
-      flagIsAdmin = decoded.roles;
+      flagIsAdmin = decoded.admin;
     }
   });
   // console.log('retornando flagIsAdmin ', flagIsAdmin);

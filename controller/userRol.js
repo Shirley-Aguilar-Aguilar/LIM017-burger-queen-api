@@ -3,7 +3,7 @@ const {
 } = require('../models/modelScheme');
 
 module.exports = {
-  getListOfUserRoles: async (req, resp, next) => {
+  getListOfUserRoles: async (req, resp) => {
     schemeTablaUserRoles.findAll()
       .then((data) => {
         const newFormat = data.map((userRol) => {

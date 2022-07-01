@@ -12,6 +12,10 @@ const schemeTablaUser = connection.define('user', {
     primaryKey: true,
     autoIncrement: true,
   },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   email: {
     type: DataTypes.STRING,
     validate: {
@@ -27,7 +31,7 @@ const schemeTablaUser = connection.define('user', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  roles: {
+  admin: {
     type: DataTypes.BOOLEAN,
     defaultValue: false, // valor por defecto
   },
@@ -60,6 +64,8 @@ const schemeTablaProduct = connection.define('product', {
   dateEntry: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
+    get: () => this.getDataValue('dateEntry')
+      .toLocaleString('en-GB', { timeZone: '+05:30' }),
   },
 }, { timestamps: false });
 
@@ -71,10 +77,6 @@ const schemeTablaOrder = connection.define('order', {
     autoIncrement: true,
   },
   client: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  status: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -117,7 +119,7 @@ schemeTablaOrder.belongsTo(schemeTablaUser, {
   targetId: 'id',
 });
 
-const schemeTablaUserRoles = connection.define('userrol', {
+const schemeTablaUserRoles = connection.define('userrols', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -155,17 +157,21 @@ const schemeTablaOrderStatus = connection.define('orderstatus', {
 }, { timestamps: false });
 
 // insert data por defecto
-/* connection.sync({ force: true }).then(() => {
+/* connection.sync({ alter: true }).then(() => {
   schemeTablaUser.create({
+    name: 'Admi1',
     email: 'admin@gmail.com',
     password: '$2b$10$bhOcgMtXGtqiwdMOh1EZHuydzdr0tcwT/bgjVONRzrzmPZ5MRMdKC',
-    // eslint-disable-next-line object-curly-newline
-    roles: true });
+    admin: true,
+    userrolId: 1,
+  });
   schemeTablaUser.create({
+    name: 'No admi',
     email: 'noadmin@gmail.com',
     password: '$2b$10$bhOcgMtXGtqiwdMOh1EZHuydzdr0tcwT/bgjVONRzrzmPZ5MRMdKC',
-    // eslint-disable-next-line object-curly-newline
-    roles: false });
+    admin: false,
+    userrolId: 2,
+  });
   schemeTablaProduct.create({
     name: 'Café americano',
     price: 5.00,
@@ -216,8 +222,11 @@ schemeTablaProduct.hasMany(schemeTablaOrdersProduct, { foreingKey: 'productId' }
 schemeTablaOrdersProduct.belongsTo(schemeTablaOrder, { foreingKey: 'orderId' });
 schemeTablaOrder.hasMany(schemeTablaOrdersProduct, { foreingKey: 'orderId' });
 
-schemeTablaUser.belongsTo(schemeTablaUserRoles, { foreingKey: 'userrolId' });
-schemeTablaUserRoles.hasMany(schemeTablaUser, { foreingKey: 'userrolId' });
+schemeTablaUser.belongsTo(schemeTablaUserRoles, { foreingKey: 'userrolid' });
+schemeTablaUserRoles.hasMany(schemeTablaUser, { foreingKey: 'userrolid' });
+
+schemeTablaOrder.belongsTo(schemeTablaOrderStatus, { foreingKey: 'orderStatusId' });
+schemeTablaOrderStatus.hasMany(schemeTablaOrder, { foreingKey: 'orderStatusId' });
 
 module.exports = {
   schemeTablaUser,

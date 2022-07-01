@@ -12,7 +12,7 @@ const {
   putUsers,
   deleteUsers,
 } = require('../controller/users');
-const { password } = require('pg/lib/defaults');
+// const { password } = require('pg/lib/defaults');
 
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
@@ -23,7 +23,7 @@ const initAdminUser = (app, next) => {
   const adminUser = {
     email: adminEmail,
     password: bcrypt.hashSync(adminPassword, 10),
-    roles: { admin: true },
+    admin: true,
   };
 
   // TODO: crear usuaria admin
@@ -97,7 +97,7 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.get('/users/:uid', requireAuth, getUserId);
+  app.get('/users/:uid', requireAdmin, getUserId);
 
   /**
    * @name POST /users
@@ -118,7 +118,7 @@ module.exports = (app, next) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {403} si ya existe usuaria con ese `email`
    */
-  app.post('/users', postUsers);
+  app.post('/users', requireAdmin, postUsers);
 
   /**
    * @name PUT /users
@@ -160,7 +160,7 @@ module.exports = (app, next) => {
    * @code {403} si no es ni admin o la misma usuaria
    * @code {404} si la usuaria solicitada no existe
    */
-  app.delete('/users/:uid', requireAuth, deleteUsers);
+  app.delete('/users/:uid', requireAdmin, deleteUsers);
 
   initAdminUser(app, next);
 };
