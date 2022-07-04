@@ -16,12 +16,14 @@ module.exports = {
     schemeTablaUser.findAll()
       .then((data) => {
         const newFormat = data.map((user) => {
+          const foundedUserRol = await schemeTablaUserRoles.findByPk(user.dataValues.id);
           const objectData = {
             id: user.dataValues.id,
+            name: user.dataValues.name,
             email: user.dataValues.email,
             password: user.dataValues.password,
             admin: user.dataValues.admin,
-            userRol: user.dataValues.userrolid,
+            userRol: foundedUserRol.dataValues.name,
 
           };
           return objectData;
