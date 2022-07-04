@@ -15,7 +15,7 @@ module.exports = {
     });
     schemeTablaUser.findAll()
       .then((data) => {
-        const newFormat = data.map((user) => {
+        const newFormat = data.map(async (user) => {
           const foundedUserRol = await schemeTablaUserRoles.findByPk(user.dataValues.id);
           const objectData = {
             id: user.dataValues.id,
