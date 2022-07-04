@@ -39,13 +39,14 @@ module.exports = {
       }],
     });
     if (foundedUser) {
+      const foundedUserRol = await schemeTablaUserRoles.findByPk(foundedUser.id);
       return resp.status(200).json({
         id: foundedUser.id,
         name: foundedUser.name,
         email: foundedUser.email,
         password: foundedUser.password,
         admin: foundedUser.admin,
-        userRol: foundedUser.dataValues.userrolid,
+        userRol: foundedUserRol.dataValues.name,
       });
     }
     return resp.status(404).json({ error: 'User not found.' });
