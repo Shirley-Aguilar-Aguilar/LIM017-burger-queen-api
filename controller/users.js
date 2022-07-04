@@ -16,12 +16,14 @@ module.exports = {
     schemeTablaUser.findAll()
       .then((data) => {
         const newFormat = data.map((user) => {
+          const foundedUserRol = await schemeTablaUserRoles.findByPk(user.dataValues.id);
           const objectData = {
             id: user.dataValues.id,
+            name: user.dataValues.name,
             email: user.dataValues.email,
             password: user.dataValues.password,
             admin: user.dataValues.admin,
-            userRol: user.dataValues.userrolid,
+            userRol: foundedUserRol.dataValues.name,
 
           };
           return objectData;
@@ -39,12 +41,14 @@ module.exports = {
       }],
     });
     if (foundedUser) {
+      const foundedUserRol = await schemeTablaUserRoles.findByPk(foundedUser.id);
       return resp.status(200).json({
         id: foundedUser.id,
+        name: foundedUser.name,
         email: foundedUser.email,
         password: foundedUser.password,
         admin: foundedUser.admin,
-        userRol: foundedUser.dataValues.userrolid,
+        userRol: foundedUserRol.dataValues.name,
       });
     }
     return resp.status(404).json({ error: 'User not found.' });
