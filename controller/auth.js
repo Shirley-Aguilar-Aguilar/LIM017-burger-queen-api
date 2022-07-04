@@ -36,6 +36,7 @@ module.exports = {
 
         return resp.status(200).json({
           accessToken: token,
+          id: foundedUser.id,
           name: foundedUser.name,
           email: foundedUser.email,
           admin: foundedUser.admin,
