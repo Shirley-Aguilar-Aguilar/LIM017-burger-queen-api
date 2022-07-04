@@ -41,6 +41,7 @@ module.exports = {
     if (foundedUser) {
       return resp.status(200).json({
         id: foundedUser.id,
+        name: foundedUser.name,
         email: foundedUser.email,
         password: foundedUser.password,
         admin: foundedUser.admin,
