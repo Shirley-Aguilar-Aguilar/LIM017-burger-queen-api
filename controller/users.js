@@ -12,24 +12,9 @@ module.exports = {
       include: [{
         model: schemeTablaUserRoles,
       }],
-    });
-    schemeTablaUser.findAll()
-      .then((data) => {
-        const newFormat = data.map(async (user) => {
-          const foundedUserRol = await schemeTablaUserRoles.findByPk(user.dataValues.userrolId);
-          const objectData = {
-            id: user.dataValues.id,
-            name: user.dataValues.name,
-            email: user.dataValues.email,
-            password: user.dataValues.password,
-            admin: user.dataValues.admin,
-            userRol: foundedUserRol.dataValues.name,
-
-          };
-          return objectData;
-        });
-        resp.status(200).json(newFormat);
-      })
+    }).then((data) => {
+      resp.status(200).json(data);
+    })
       .catch((error) => { resp.status(500).json({ error: error.message }); });
   },
   getUserId: async (req, resp) => {
