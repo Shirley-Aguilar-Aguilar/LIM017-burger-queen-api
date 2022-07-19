@@ -12,24 +12,9 @@ module.exports = {
       include: [{
         model: schemeTablaUserRoles,
       }],
-    });
-    schemeTablaUser.findAll()
-      .then((data) => {
-        const newFormat = data.map((user) => {
-          const foundedUserRol = await schemeTablaUserRoles.findByPk(user.dataValues.id);
-          const objectData = {
-            id: user.dataValues.id,
-            name: user.dataValues.name,
-            email: user.dataValues.email,
-            password: user.dataValues.password,
-            admin: user.dataValues.admin,
-            userRol: foundedUserRol.dataValues.name,
-
-          };
-          return objectData;
-        });
-        resp.status(200).json(newFormat);
-      })
+    }).then((data) => {
+      resp.status(200).json(data);
+    })
       .catch((error) => { resp.status(500).json({ error: error.message }); });
   },
   getUserId: async (req, resp) => {
@@ -114,12 +99,14 @@ module.exports = {
     if (newEmail == null || newPassword == null || newEmail === '' || newPassword === '') {
       return resp.status(400).json({ message: 'Email and password must not be empty.' });
     }
+
+    const foundedUserRol = await schemeTablaUserRoles.findByPk(newRol);
     if (foundedUser) {
       try {
         foundedUser.email = newEmail;
         foundedUser.password = newPassword;
         foundedUser.admin = newAdmi;
-        foundedUser.userRol = newRol;
+        foundedUser.userrolId = newRol;
 
         await foundedUser.save();
         return resp.status(200).json({
@@ -127,7 +114,7 @@ module.exports = {
           email: newEmail,
           password: newPassword,
           admin: newAdmi,
-          userRolesId: newRol,
+          userRol: foundedUserRol.dataValues.name,
         });
       } catch (error) {
         return resp.status(500).json({ error: error.message });
