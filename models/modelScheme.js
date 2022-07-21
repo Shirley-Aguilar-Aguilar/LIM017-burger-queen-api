@@ -64,8 +64,6 @@ const schemeTablaProduct = connection.define('product', {
   dateEntry: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
-    get: () => this.getDataValue('dateEntry')
-      .toLocaleString('en-GB', { timeZone: '+05:30' }),
   },
 }, { timestamps: false });
 
